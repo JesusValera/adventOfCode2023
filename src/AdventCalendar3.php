@@ -34,7 +34,7 @@ final class AdventCalendar3
         foreach ($this->table as $axisX => $row) {
             foreach ($row as $axisY => $char) {
                 if (in_array($char, self::SYMBOLS, true)) {
-                    $numbers[] = [$axisX, $axisY];
+                    $numbers[] = $this->table[$axisX - 1][$axisY];
                 }
             }
         }
