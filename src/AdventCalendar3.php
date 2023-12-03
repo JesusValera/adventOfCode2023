@@ -6,7 +6,7 @@ namespace Kata;
 
 final class AdventCalendar3
 {
-    private array $table = [];
+    private const GEAR_SYMBOL = '*';
 
     private const SYMBOLS = [
         '@', '$', '%', '#', '&', '*', '+', '=', '-', '~',
@@ -14,7 +14,7 @@ final class AdventCalendar3
         ',', ';', ':', "'", '"', '^', '`', '/', '|', "\\",
     ];
 
-    private bool $specialSymbol = false;
+    private array $table = [];
 
     public function __construct(string $input)
     {
@@ -31,36 +31,50 @@ final class AdventCalendar3
 
     public function solution1(): int
     {
-        $numbers = [];
-        foreach ($this->table as $axisX => $row) {
-            foreach ($row as $axisY => $char) {
-                if (in_array($char, self::SYMBOLS, true)) {
-                    $numbers[] = $this->checkSurroundingChars($axisX, $axisY);
-                }
-            }
-        }
-
-        $flatNumbers = array_merge(...array_merge(...$numbers));
-        return array_reduce($flatNumbers, static fn(int $carry, int $n) => $carry + $n, 0);
+        return $this->calculateSolution(false);
     }
 
-    public function solution2(string $specialSymbol): int
+    public function solution2(): int
     {
-        $this->specialSymbol = true;
+        return $this->calculateSolution(true);
+    }
+
+    private function calculateSolution(bool $specialSymbol): int
+    {
+        $numbers = $this->getNumbers($specialSymbol);
+        $flatNumbers = $this->flattenNumbers($numbers);
+
+        return $this->sumNumbers($flatNumbers);
+    }
+
+    private function getNumbers(bool $specialSymbol): array
+    {
         $numbers = [];
         foreach ($this->table as $axisX => $row) {
             foreach ($row as $axisY => $char) {
-                if ($char === $specialSymbol) {
-                    $numbers[] = $this->checkSurroundingChars($axisX, $axisY);
+                if ($this->shouldCheckChar($char, $specialSymbol)) {
+                    $numbers[] = $this->checkSurroundingChars($axisX, $axisY, $specialSymbol);
                 }
             }
         }
 
-        $flatNumbers = array_merge(...array_merge(...$numbers));
-        return array_reduce($flatNumbers, static fn(int $carry, int $n) => $carry + $n, 0);
+        return $numbers;
     }
 
-    private function checkSurroundingChars(int $axisX, int $axisY): array
+    private function shouldCheckChar(string $char, bool $specialSymbol): bool
+    {
+        return (!$specialSymbol && in_array($char, self::SYMBOLS, true)) // Solution 1
+            || ($specialSymbol && $char === self::GEAR_SYMBOL); // Solution 2
+    }
+
+    private function checkSurroundingChars(int $axisX, int $axisY, bool $isSpecialSymbol): array
+    {
+        $surroundingCharNumbers = $this->getSurroundingCharNumbers($axisX, $axisY);
+
+        return $this->applySpecialSymbolFilter($surroundingCharNumbers, $isSpecialSymbol);
+    }
+
+    private function getSurroundingCharNumbers(int $axisX, int $axisY): array
     {
         $numbers = [];
         for ($i = -1; $i <= 1; $i++) {
@@ -68,15 +82,9 @@ final class AdventCalendar3
                 if ($this->currentPosition($i, $j)) {
                     continue;
                 }
-
-                $numbers[] = $this->getSurroundingNumbers($axisX, $i, $axisY, $j);
+                $numbers[] = $this->getSurroundingNumbers($axisX + $i, $axisY + $j);
             }
         }
-
-        if ($this->exercise2()) {
-            return $this->filterOnlyGears($numbers);
-        }
-
         return $numbers;
     }
 
@@ -88,23 +96,23 @@ final class AdventCalendar3
         return $i === 0 && $j === 0;
     }
 
-    private function getSurroundingNumbers(int $axisX, int $i, int $axisY, int $j): array
+    private function getSurroundingNumbers(int $axisX, int $axisY): array
     {
-        $c = $this->table[$axisX + $i][$axisY + $j] ?? null;
-        if (!is_numeric($c)) {
+        $char = $this->table[$axisX][$axisY] ?? null;
+        if (!is_numeric($char)) {
             return [];
         }
 
         $numbers = [];
 
-        $posLeft = $this->getIndexLeftPositionsWithNumber($axisX + $i, $axisY + $j);
-        $posRight = $this->getIndexRightPositionWithNumber($axisX + $i, $axisY + $j);
+        $posLeft = $this->getIndexLeftPositionsWithNumber($axisX, $axisY);
+        $posRight = $this->getIndexRightPositionWithNumber($axisX, $axisY);
 
         $finalNumber = null;
         for ($z = -$posLeft; $z <= $posRight; $z++) {
-            $finalNumber .= (string)$this->table[$axisX + $i][$axisY + $j + $z];
+            $finalNumber .= $this->table[$axisX][$axisY + $z];
             // Reset number to do not count it twice
-            $this->table[$axisX + $i][$axisY + $j + $z] = '.';
+            $this->table[$axisX][$axisY + $z] = '.';
         }
 
         $numbers[] = $finalNumber;
@@ -113,36 +121,35 @@ final class AdventCalendar3
 
     private function getIndexLeftPositionsWithNumber(int $x, int $y): int
     {
-        $posLeft = 0;
-        do {
-            $char = $this->table[$x][$y - 1 - $posLeft] ?? null;
-            if (is_numeric($char)) {
-                $posLeft++;
-            }
-        } while (is_numeric($char));
-
-        return $posLeft;
+        return $this->getIndexPositionWithNumber($x, $y, -1);
     }
 
     private function getIndexRightPositionWithNumber(int $x, int $y): int
     {
-        $posRight = 0;
+        return $this->getIndexPositionWithNumber($x, $y, 1);
+    }
+
+    private function getIndexPositionWithNumber(int $x, int $y, int $direction): int
+    {
+        $pos = 0;
         do {
-            $char = $this->table[$x][$y + 1 + $posRight] ?? null;
+            $char = $this->table[$x][$y + $direction * ($pos + 1)] ?? null;
             if (is_numeric($char)) {
-                $posRight++;
+                $pos++;
             }
         } while (is_numeric($char));
 
-        return $posRight;
+        return $pos;
     }
 
-    private function exercise2(): bool
+    private function applySpecialSymbolFilter(array $numbers, bool $isSpecialSymbol): array
     {
-        return $this->specialSymbol;
+        return !$isSpecialSymbol
+            ? $numbers // Solution 1
+            : $this->filterOnlyGears($numbers); // Solution 2
     }
 
-    public function filterOnlyGears(array $numbers): array
+    private function filterOnlyGears(array $numbers): array
     {
         $n = array_merge(...$numbers);
 
@@ -152,5 +159,15 @@ final class AdventCalendar3
         }
 
         return [[array_reduce($n, static fn($c, $v) => $c * $v, 1)]];
+    }
+
+    private function flattenNumbers(array $numbers): array
+    {
+        return array_merge(...array_merge(...$numbers));
+    }
+
+    private function sumNumbers(array $flatNumbers): int
+    {
+        return array_reduce($flatNumbers, static fn(int $carry, int $n) => $carry + $n, 0);
     }
 }

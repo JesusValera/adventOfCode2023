@@ -8,8 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 final class AdventCalendar3Test extends TestCase
 {
-    private const GEAR_SYMBOL = '*';
-
     private const SAMPLE_STRING = <<<TXT
 467..114..
 ...*......
@@ -100,7 +98,7 @@ TXT;
     public function testSolution2Sample(): void
     {
         $advent = new AdventCalendar3(self::SAMPLE_STRING);
-        $result = $advent->solution2(self::GEAR_SYMBOL);
+        $result = $advent->solution2();
 
         self::assertEquals(467835, $result);
     }
@@ -110,7 +108,7 @@ TXT;
         $str = file_get_contents(__DIR__ . '/fixtures/day3.txt');
 
         $advent = new AdventCalendar3($str);
-        $result = $advent->solution2(self::GEAR_SYMBOL);
+        $result = $advent->solution2();
 
         self::assertEquals(82818007, $result);
     }
