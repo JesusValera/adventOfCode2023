@@ -57,4 +57,18 @@ TXT;
 
         self::assertEquals(8, $result);
     }
+
+    public function testSpecialCharIsInBorder(): void
+    {
+        $str = <<<TXT
+...1*
+...11
+.....
+TXT;
+
+        $advent = new AdventCalendar3($str);
+        $result = $advent->solution1();
+
+        self::assertEquals(3, $result);
+    }
 }

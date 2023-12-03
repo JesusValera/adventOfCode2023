@@ -41,7 +41,7 @@ final class AdventCalendar3
                                 continue;
                             }
 
-                            $c = $this->table[$axisX + $i][$axisY + $j];
+                            $c = $this->table[$axisX + $i][$axisY + $j] ?? null;
                             if (is_numeric($c)) {
                                 $numbers[] = $c;
                             }
