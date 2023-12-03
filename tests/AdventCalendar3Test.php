@@ -8,13 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 final class AdventCalendar3Test extends TestCase
 {
-    /**
-     * Considerations:
-     * 1. Check the full number: go to left and right until surrounding dots
-     * 2. If a number is surrounded by multiple special chars:
-     * - Replace it by dots '.', we don't want to add it more than once
-     */
-
     private const SAMPLE_STRING = <<<TXT
 467..114..
 ...*......
@@ -59,14 +52,28 @@ TXT;
     public function testSpecialCharIsInBorder(): void
     {
         $str = <<<TXT
+...1.
 ...1*
-...11
-.....
+....1
 TXT;
 
         $advent = new AdventCalendar3($str);
         $result = $advent->solution1();
 
         self::assertEquals(3, $result);
+    }
+
+    public function testNumberWithMultipleDigits(): void
+    {
+        $str = <<<TXT
+..11.
+...*.
+...1.
+TXT;
+
+        $advent = new AdventCalendar3($str);
+        $result = $advent->solution1();
+
+        self::assertEquals(11 + 1, $result);
     }
 }

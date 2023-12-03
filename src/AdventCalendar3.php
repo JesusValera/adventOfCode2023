@@ -61,7 +61,36 @@ final class AdventCalendar3
 
                 $c = $this->table[$axisX + $i][$axisY + $j] ?? null;
                 if (is_numeric($c)) {
-                    $numbers[] = $c;
+                    $posLeft = 0;
+                    do {
+                        $aRX = $axisX + $i;
+                        $aRY = $axisY + $j - 1 - $posLeft;
+                        $lValue = $this->table[$aRX][$aRY] ?? null;
+                        if (is_numeric($lValue)) {
+                            $posLeft++;
+                        }
+                    } while (is_numeric($lValue));
+
+                    $posRight = 0;
+                    do {
+                        $aLX = $axisX + $i;
+                        $aLY = $axisY + $j + 1 + $posRight;
+                        $rValue = $this->table[$aLX][$aLY] ?? null;
+                        if (is_numeric($rValue)) {
+                            $posRight++;
+                        }
+                    } while (is_numeric($rValue));
+
+                    $finalNumber = null;
+                    for ($z = -$posLeft; $z <= $posRight; $z++) {
+                        $aX = $axisX + $i;
+                        $aY = $axisY + $j + $z;
+                        $finalNumber .= (string) $this->table[$aX][$aY];
+                        // Reset number to do not count it twice
+                        $this->table[$axisX + $i][$axisY + $j + $z] = '.';
+                    }
+
+                    $numbers[] = $finalNumber;
                 }
             }
         }
