@@ -14,6 +14,8 @@ final class AdventCalendar3
         ',', ';', ':', "'", '"', '^', '`', '/', '|', "\\",
     ];
 
+    private bool $specialSymbol = false;
+
     public function __construct(string $input)
     {
         $this->transformInputToTable($input);
@@ -42,11 +44,20 @@ final class AdventCalendar3
         return array_reduce($flatNumbers, static fn(int $carry, int $n) => $carry + $n, 0);
     }
 
-    public function solution2(string $str): int
+    public function solution2(string $specialSymbol): int
     {
+        $this->specialSymbol = true;
         $numbers = [];
+        foreach ($this->table as $axisX => $row) {
+            foreach ($row as $axisY => $char) {
+                if ($char === $specialSymbol) {
+                    $numbers[] = $this->checkSurroundingChars($axisX, $axisY);
+                }
+            }
+        }
 
-        return array_reduce($numbers, static fn(int $carry, int $n) => $carry + $n, 0);
+        $flatNumbers = array_merge(...array_merge(...$numbers));
+        return array_reduce($flatNumbers, static fn(int $carry, int $n) => $carry + $n, 0);
     }
 
     private function checkSurroundingChars(int $axisX, int $axisY): array
@@ -60,6 +71,10 @@ final class AdventCalendar3
 
                 $numbers[] = $this->getSurroundingNumbers($axisX, $i, $axisY, $j);
             }
+        }
+
+        if ($this->exercise2()) {
+            return $this->filterOnlyGears($numbers);
         }
 
         return $numbers;
@@ -120,5 +135,22 @@ final class AdventCalendar3
         } while (is_numeric($char));
 
         return $posRight;
+    }
+
+    private function exercise2(): bool
+    {
+        return $this->specialSymbol;
+    }
+
+    public function filterOnlyGears(array $numbers): array
+    {
+        $n = array_merge(...$numbers);
+
+        // We only want arrays with 2 numbers
+        if (count($n) !== 2) {
+            return [[]];
+        }
+
+        return [[array_reduce($n, static fn($c, $v) => $c * $v, 1)]];
     }
 }
