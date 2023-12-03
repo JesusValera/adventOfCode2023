@@ -76,4 +76,22 @@ TXT;
 
         self::assertEquals(11 + 1, $result);
     }
+
+    public function testSolution1Sample(): void
+    {
+        $advent = new AdventCalendar3(self::SAMPLE_STRING);
+        $result = $advent->solution1();
+
+        self::assertEquals(4361, $result);
+    }
+
+    public function testSolution1(): void
+    {
+        $str = file_get_contents(__DIR__ . '/fixtures/day3.txt');
+
+        $advent = new AdventCalendar3($str);
+        $result = $advent->solution1();
+
+        self::assertEquals(539637, $result);
+    }
 }
