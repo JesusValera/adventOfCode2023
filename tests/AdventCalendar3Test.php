@@ -10,10 +10,8 @@ final class AdventCalendar3Test extends TestCase
 {
     /**
      * Considerations:
-     *
-     * 1. Check limits of board ($table)
-     * 2. Check the full number: go to left and right until surrounding dots
-     * 3. If a number is surrounded by multiple special chars:
+     * 1. Check the full number: go to left and right until surrounding dots
+     * 2. If a number is surrounded by multiple special chars:
      * - Replace it by dots '.', we don't want to add it more than once
      */
 
@@ -47,15 +45,15 @@ TXT;
     public function testGetNumbersNextToSpecialChar(): void
     {
         $str = <<<TXT
-..111
+..1.1
 ..1*1
-..111
+..1.1
 TXT;
 
         $advent = new AdventCalendar3($str);
         $result = $advent->solution1();
 
-        self::assertEquals(8, $result);
+        self::assertEquals(6, $result);
     }
 
     public function testSpecialCharIsInBorder(): void

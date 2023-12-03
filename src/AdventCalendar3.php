@@ -34,24 +34,13 @@ final class AdventCalendar3
         foreach ($this->table as $axisX => $row) {
             foreach ($row as $axisY => $char) {
                 if (in_array($char, self::SYMBOLS, true)) {
-                    for ($i = -1; $i <= 1; $i++) {
-                        for ($j = -1; $j <= 1; $j++) {
-                            // Current element is special char, cannot be a number
-                            if ($i === 0 && $j === 0) {
-                                continue;
-                            }
-
-                            $c = $this->table[$axisX + $i][$axisY + $j] ?? null;
-                            if (is_numeric($c)) {
-                                $numbers[] = $c;
-                            }
-                        }
-                    }
+                    $numbers[] = $this->checkSurroundingChars($axisX, $axisY);
                 }
             }
         }
 
-        return array_reduce($numbers, static fn(int $carry, int $n) => $carry + $n, 0);
+        $flatNumbers = array_merge(...$numbers);
+        return array_reduce($flatNumbers, static fn(int $carry, int $n) => $carry + $n, 0);
     }
 
     public function solution2(string $str): int
@@ -59,5 +48,32 @@ final class AdventCalendar3
         $numbers = [];
 
         return array_reduce($numbers, static fn(int $carry, int $n) => $carry + $n, 0);
+    }
+
+    private function checkSurroundingChars(int $axisX, int $axisY): array
+    {
+        $numbers = [];
+        for ($i = -1; $i <= 1; $i++) {
+            for ($j = -1; $j <= 1; $j++) {
+                if ($this->currentPosition($i, $j)) {
+                    continue;
+                }
+
+                $c = $this->table[$axisX + $i][$axisY + $j] ?? null;
+                if (is_numeric($c)) {
+                    $numbers[] = $c;
+                }
+            }
+        }
+
+        return $numbers;
+    }
+
+    /**
+     * Current element is always the special char, it cannot be a number
+     */
+    private function currentPosition(mixed $i, mixed $j): bool
+    {
+        return $i === 0 && $j === 0;
     }
 }
