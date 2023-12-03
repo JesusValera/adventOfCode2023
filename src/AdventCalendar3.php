@@ -22,7 +22,6 @@ final class AdventCalendar3
     private function transformInputToTable(string $input): void
     {
         $lines = explode(PHP_EOL, $input);
-
         foreach ($lines as $line) {
             $this->table[] = str_split($line);
         }
@@ -39,7 +38,7 @@ final class AdventCalendar3
             }
         }
 
-        $flatNumbers = array_merge(...$numbers);
+        $flatNumbers = array_merge(...array_merge(...$numbers));
         return array_reduce($flatNumbers, static fn(int $carry, int $n) => $carry + $n, 0);
     }
 
@@ -59,39 +58,7 @@ final class AdventCalendar3
                     continue;
                 }
 
-                $c = $this->table[$axisX + $i][$axisY + $j] ?? null;
-                if (is_numeric($c)) {
-                    $posLeft = 0;
-                    do {
-                        $aRX = $axisX + $i;
-                        $aRY = $axisY + $j - 1 - $posLeft;
-                        $lValue = $this->table[$aRX][$aRY] ?? null;
-                        if (is_numeric($lValue)) {
-                            $posLeft++;
-                        }
-                    } while (is_numeric($lValue));
-
-                    $posRight = 0;
-                    do {
-                        $aLX = $axisX + $i;
-                        $aLY = $axisY + $j + 1 + $posRight;
-                        $rValue = $this->table[$aLX][$aLY] ?? null;
-                        if (is_numeric($rValue)) {
-                            $posRight++;
-                        }
-                    } while (is_numeric($rValue));
-
-                    $finalNumber = null;
-                    for ($z = -$posLeft; $z <= $posRight; $z++) {
-                        $aX = $axisX + $i;
-                        $aY = $axisY + $j + $z;
-                        $finalNumber .= (string) $this->table[$aX][$aY];
-                        // Reset number to do not count it twice
-                        $this->table[$axisX + $i][$axisY + $j + $z] = '.';
-                    }
-
-                    $numbers[] = $finalNumber;
-                }
+                $numbers[] = $this->getSurroundingNumbers($axisX, $i, $axisY, $j);
             }
         }
 
@@ -104,5 +71,54 @@ final class AdventCalendar3
     private function currentPosition(mixed $i, mixed $j): bool
     {
         return $i === 0 && $j === 0;
+    }
+
+    private function getSurroundingNumbers(int $axisX, int $i, int $axisY, int $j): array
+    {
+        $c = $this->table[$axisX + $i][$axisY + $j] ?? null;
+        if (!is_numeric($c)) {
+            return [];
+        }
+
+        $numbers = [];
+
+        $posLeft = $this->getIndexLeftPositionsWithNumber($axisX + $i, $axisY + $j);
+        $posRight = $this->getIndexRightPositionWithNumber($axisX + $i, $axisY + $j);
+
+        $finalNumber = null;
+        for ($z = -$posLeft; $z <= $posRight; $z++) {
+            $finalNumber .= (string)$this->table[$axisX + $i][$axisY + $j + $z];
+            // Reset number to do not count it twice
+            $this->table[$axisX + $i][$axisY + $j + $z] = '.';
+        }
+
+        $numbers[] = $finalNumber;
+        return $numbers;
+    }
+
+    private function getIndexLeftPositionsWithNumber(int $x, int $y): int
+    {
+        $posLeft = 0;
+        do {
+            $char = $this->table[$x][$y - 1 - $posLeft] ?? null;
+            if (is_numeric($char)) {
+                $posLeft++;
+            }
+        } while (is_numeric($char));
+
+        return $posLeft;
+    }
+
+    private function getIndexRightPositionWithNumber(int $x, int $y): int
+    {
+        $posRight = 0;
+        do {
+            $char = $this->table[$x][$y + 1 + $posRight] ?? null;
+            if (is_numeric($char)) {
+                $posRight++;
+            }
+        } while (is_numeric($char));
+
+        return $posRight;
     }
 }
