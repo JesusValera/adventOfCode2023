@@ -28,18 +28,30 @@ final class AdventCalendar3
         }
     }
 
-    public function solution1(): array
+    public function solution1(): int
     {
         $numbers = [];
         foreach ($this->table as $axisX => $row) {
             foreach ($row as $axisY => $char) {
                 if (in_array($char, self::SYMBOLS, true)) {
-                    $numbers[] = $this->table[$axisX - 1][$axisY];
+                    for ($i = -1; $i <= 1; $i++) {
+                        for ($j = -1; $j <= 1; $j++) {
+                            // Current element is special char, cannot be a number
+                            if ($i === 0 && $j === 0) {
+                                continue;
+                            }
+
+                            $c = $this->table[$axisX + $i][$axisY + $j];
+                            if (is_numeric($c)) {
+                                $numbers[] = $c;
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        return $numbers;
+        return array_reduce($numbers, static fn(int $carry, int $n) => $carry + $n, 0);
     }
 
     public function solution2(string $str): int

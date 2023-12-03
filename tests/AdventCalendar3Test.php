@@ -41,6 +41,20 @@ TXT;
         $advent = new AdventCalendar3($str);
         $result = $advent->solution1();
 
-        self::assertEquals([1], $result);
+        self::assertEquals(1, $result);
+    }
+
+    public function testGetNumbersNextToSpecialChar(): void
+    {
+        $str = <<<TXT
+..111
+..1*1
+..111
+TXT;
+
+        $advent = new AdventCalendar3($str);
+        $result = $advent->solution1();
+
+        self::assertEquals(8, $result);
     }
 }
