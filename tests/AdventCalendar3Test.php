@@ -21,23 +21,17 @@ final class AdventCalendar3Test extends TestCase
 .664.598..
 TXT;
 
-    public function testTransformInputIntoTable(): void
+    public function testGetPositionSpecialChar(): void
     {
         $str = <<<TXT
-1..
-4.5
+.....
+...*.
+*....
 TXT;
 
         $advent = new AdventCalendar3($str);
-
         $result = $advent->solution1();
 
-        self::assertEquals(
-            [
-                ['1', '.', '.'],
-                ['4', '.', '5'],
-            ],
-            $result
-        );
+        self::assertEquals([[1, 3], [2, 0]], $result);
     }
 }

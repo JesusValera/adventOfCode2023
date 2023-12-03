@@ -30,10 +30,16 @@ final class AdventCalendar3
 
     public function solution1(): array
     {
-//        $numbers = [];
-//        return array_reduce($numbers, static fn(int $carry, int $n) => $carry + $n, 0);
+        $numbers = [];
+        foreach ($this->table as $axisX => $row) {
+            foreach ($row as $axisY => $char) {
+                if (in_array($char, self::SYMBOLS, true)) {
+                    $numbers[] = [$axisX, $axisY];
+                }
+            }
+        }
 
-        return $this->table;
+        return $numbers;
     }
 
     public function solution2(string $str): int
